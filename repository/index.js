@@ -19,9 +19,7 @@ const getPostponedSubcases = async () => {
           GRAPH <${targetGraph}>
           {
             ?subcase besluitvorming:isGeagendeerdVia ?agendapunt ;
-             mu:uuid ?id ;
-             dct:title ?title ;
-             dct:created ?created .
+             mu:uuid ?id .
             ?agendapunt ext:heeftVerdaagd ?verdaagd .
            }
       } GROUP BY ?subcase`;
