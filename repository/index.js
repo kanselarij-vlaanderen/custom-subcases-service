@@ -11,6 +11,7 @@ const getPostponedSubcases = async () => {
           ?subcase a dbpedia:UnitOfWork ;
             mu:uuid ?id ;
             besluitvorming:vindtPlaatsTijdens ?activity .
+          ?activity a besluitvorming:Agendering .
           ?activity besluitvorming:genereertAgendapunt ?agendapunt .
             
           ?agendapunt besluitvorming:ingetrokken ?retracted . 
