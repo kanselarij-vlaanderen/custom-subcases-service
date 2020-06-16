@@ -1,7 +1,6 @@
 import mu from 'mu';
 
 const getPostponedSubcases = async () => {
-
     const query = `
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
@@ -9,9 +8,9 @@ const getPostponedSubcases = async () => {
       
       SELECT ?id WHERE { 
           ?subcase a dbpedia:UnitOfWork ;
-            mu:uuid ?id ;
-            besluitvorming:vindtPlaatsTijdens ?activity .
+            mu:uuid ?id .
           ?activity a besluitvorming:Agendering .
+          ?activity besluitvorming:vindtPlaatsTijdens ?subcase .
           ?activity besluitvorming:genereertAgendapunt ?agendapunt .
             
           ?agendapunt besluitvorming:ingetrokken ?retracted . 
