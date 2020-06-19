@@ -1,7 +1,7 @@
-import mu from 'mu';
+import { query, sparqlEscapeUri, sparqlEscapeString } from 'mu';
 
 const getPostponedSubcases = async () => {
-    const query = `
+    const postPonedSubcaseQuery = `
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
       PREFIX dbpedia: <http://dbpedia.org/ontology/>  
@@ -17,22 +17,81 @@ const getPostponedSubcases = async () => {
           FILTER(?retracted ="true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>)  
       } GROUP BY ?subcase`;
 
-    let data = await mu.query(query);
+    let data = await query(postPonedSubcaseQuery);
     return parseSparqlResults(data, 'subcases');
-}
+};
+
+const queryActivitiesOfSubcase = async (subcaseId) => {
+  const activitiesOfSubcaseQuery = `
+    PREFIX  ext:  <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX  mu:  <http://mu.semte.ch/vocabularies/core/>
+    PREFIX  besluitvorming:  <http://data.vlaanderen.be/ns/besluitvorming#>
+    PREFIX  besluit: <http://data.vlaanderen.be/ns/besluit#>
+    PREFIX  dossier: <https://data.vlaanderen.be/ns/dossier#>
+    PREFIX  dbpedia:  <http://dbpedia.org/ontology/>
+
+    Select ?activity ?subcase ?startDatum (COUNT(?agendaitem) as ?totalAgendaitems) WHERE {
+      ?subcase a dbpedia:UnitOfWork ;
+        mu:uuid ${sparqlEscapeString(subcaseId)} .
+      ?activity besluitvorming:vindtPlaatsTijdens ?subcase .
+      ?activity a besluitvorming:Agendering ;
+        dossier:startDatum ?startDatum ;
+        besluitvorming:genereertAgendapunt ?agendaitem .
+    } GROUP BY ?activity ?subcase ?startDatum ORDER BY ?startDatum
+  `;
+
+  const queryResult = await query(activitiesOfSubcaseQuery);
+  return parseSparqlResults(queryResult);
+};
+
+const getPhasesOfActivities = async (activityUri, subcaseUri) => {
+  const phasesOfActivitiesQuery =`
+    PREFIX  ext:  <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX  mu:  <http://mu.semte.ch/vocabularies/core/>
+    PREFIX  besluitvorming:  <http://data.vlaanderen.be/ns/besluitvorming#>
+    PREFIX  besluit: <http://data.vlaanderen.be/ns/besluit#>
+    PREFIX  dossier: <https://data.vlaanderen.be/ns/dossier#>
+    PREFIX  dbpedia:  <http://dbpedia.org/ontology/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+
+    SELECT ?agendaitem ?previousAgenda ?agendaStatus ?agendaNumber ?geplandeStart ?postponed ?approved WHERE {
+      ${sparqlEscapeUri(activityUri)} a besluitvorming:Agendering ;
+                besluitvorming:vindtPlaatsTijdens ${sparqlEscapeUri(subcaseUri)} ;
+                besluitvorming:genereertAgendapunt ?agendaitem .
+      ?agenda dct:hasPart ?agendaitem ;
+              besluitvorming:isAgendaVoor ?meeting ;
+              besluitvorming:volgnummer ?agendaNumber ;
+              besluitvorming:agendaStatus ?agendaStatus .
+      OPTIONAL { ?agenda prov:wasRevisionOf ?previousAgenda . }
+      ?meeting besluit:geplandeStart ?geplandeStart .
+      ?agendaitem besluitvorming:ingetrokken ?postponed .
+
+      OPTIONAL {
+        ${sparqlEscapeUri(subcaseUri)} ext:procedurestapHeeftBesluit ?decision .
+        ?decision besluitvorming:goedgekeurd ?approved .
+      }
+    }
+  `;
+  const data = await query(phasesOfActivitiesQuery);
+  return parseSparqlResults(data);
+};
 
 const parseSparqlResults = (data) => {
-    const vars = data.head.vars;
-    return data.results.bindings.map(binding => {
-        let obj = {};
-        vars.forEach(varKey => {
-            if (binding[varKey]) {
-                obj[varKey] = binding[varKey].value;
-            }
-        });
-        return obj.id;
-    })
+  const vars = data.head.vars;
+  return data.results.bindings.map(binding => {
+    let obj = {};
+    vars.forEach(varKey => {
+      if (binding[varKey]) {
+        obj[varKey] = binding[varKey].value;
+      }
+    });
+    return obj;
+  })
 };
+
 module.exports = {
-    getPostponedSubcases
+    getPostponedSubcases,
+    queryActivitiesOfSubcase,
+    getPhasesOfActivities
 };
