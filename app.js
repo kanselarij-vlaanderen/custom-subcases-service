@@ -32,7 +32,7 @@ app.get('/getSubcasePhases', async (req, res) => {
   try {
     const activityUris = await repository.queryActivitiesOfSubcase(subcaseId);
     
-    if (activityUris && activityUris.length > 1 ) {
+    if (activityUris && activityUris.length > 0 ) {
       syncforeach(activityUris, (next, activityUri, index, array) => {
         var addEventsAndStuff;
         (addEventsAndStuff = async function(){
