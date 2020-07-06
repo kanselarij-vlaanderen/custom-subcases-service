@@ -34,8 +34,8 @@ app.get('/getSubcasePhases', async (req, res) => {
     
     if (activityUris && activityUris.length > 0 ) {
       syncforeach(activityUris, (next, activityUri, index, array) => {
-        var addEventsAndStuff;
-        (addEventsAndStuff = async function(){
+        var getPhases;
+        (getPhases = async function(){
           const result = await repository.getPhasesOfActivities(activityUri.activity, activityUri.subcase);
 
           if ((parseInt(activityUri.totalAgendaitems) == 1) && (result[0].agendaStatus == DESIGN_AGENDA_STATUS)) {
