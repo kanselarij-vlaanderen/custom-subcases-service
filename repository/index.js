@@ -55,7 +55,7 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
     PREFIX prov: <http://www.w3.org/ns/prov#>
     PREFIX brc: <http://kanselarij.vo.data.gift/id/concept/beslissings-resultaat-codes/>
 
-    SELECT ?agendaitem ?previousAgenda ?agendaStatus ?agendaNumber ?geplandeStart ?postponed ?approved WHERE {
+    SELECT ?agendaitem ?previousAgenda ?agendaStatus ?agendaNumber ?geplandeStart ?decisionResultId WHERE {
       ${sparqlEscapeUri(activityUri)} a besluitvorming:Agendering ;
                 besluitvorming:vindtPlaatsTijdens ${sparqlEscapeUri(subcaseUri)} ;
                 besluitvorming:genereertAgendapunt ?agendaitem .
@@ -65,11 +65,11 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
               besluitvorming:agendaStatus ?agendaStatus .
       OPTIONAL { ?agenda prov:wasRevisionOf ?previousAgenda . }
       ?meeting besluit:geplandeStart ?geplandeStart .
-      ?agendaitem besluitvorming:ingetrokken ?postponed .
 
       OPTIONAL {
         ?treatment besluitvorming:heeftOnderwerp ?agendaitem .
-        ?treatment besluitvorming:resultaat ?approved .
+        ?treatment besluitvorming:resultaat ?decisionResult .
+        ?decisionResult mu:uuid ?decisionResultId .
       }
     }
   `;
