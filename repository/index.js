@@ -12,7 +12,6 @@ const getPostponedSubcases = async () => {
           ?activity a besluitvorming:Agendering .
           ?activity besluitvorming:vindtPlaatsTijdens ?subcase .
           ?activity besluitvorming:genereertAgendapunt ?agendapunt .
-            
           ?agendapunt besluitvorming:ingetrokken ?retracted . 
           FILTER(?retracted ="true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>)  
       } GROUP BY ?subcase`;
@@ -54,8 +53,9 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
     PREFIX  dbpedia:  <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
+    PREFIX brc: <http://kanselarij.vo.data.gift/id/concept/beslissings-resultaat-codes/>
 
-    SELECT ?agendaitem ?previousAgenda ?agendaStatus ?agendaNumber ?geplandeStart ?postponed ?approved WHERE {
+    SELECT ?agendaitem ?previousAgenda ?agendaStatus ?agendaNumber ?geplandeStart ?decisionResultId WHERE {
       ${sparqlEscapeUri(activityUri)} a besluitvorming:Agendering ;
                 besluitvorming:vindtPlaatsTijdens ${sparqlEscapeUri(subcaseUri)} ;
                 besluitvorming:genereertAgendapunt ?agendaitem .
@@ -65,11 +65,11 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
               besluitvorming:agendaStatus ?agendaStatus .
       OPTIONAL { ?agenda prov:wasRevisionOf ?previousAgenda . }
       ?meeting besluit:geplandeStart ?geplandeStart .
-      ?agendaitem besluitvorming:ingetrokken ?postponed .
 
       OPTIONAL {
-        ${sparqlEscapeUri(subcaseUri)} ext:procedurestapHeeftBesluit ?decision .
-        ?decision besluitvorming:goedgekeurd ?approved .
+        ?treatment besluitvorming:heeftOnderwerp ?agendaitem .
+        ?treatment besluitvorming:resultaat ?decisionResult .
+        ?decisionResult mu:uuid ?decisionResultId .
       }
     }
   `;
