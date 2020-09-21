@@ -4,10 +4,10 @@ const getPostponedSubcases = async () => {
     const postPonedSubcaseQuery = `
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX besluitvorming: <http://data.vlaanderen.be/ns/besluitvorming#>
-      PREFIX dbpedia: <http://dbpedia.org/ontology/>  
+      PREFIX  dossier: <https://data.vlaanderen.be/ns/dossier#>
       
       SELECT ?id WHERE { 
-          ?subcase a dbpedia:UnitOfWork ;
+          ?subcase a dossier:Procedurestap ;
             mu:uuid ?id .
           ?activity a besluitvorming:Agendering .
           ?activity besluitvorming:vindtPlaatsTijdens ?subcase .
@@ -27,10 +27,9 @@ const queryActivitiesOfSubcase = async (subcaseId) => {
     PREFIX  besluitvorming:  <http://data.vlaanderen.be/ns/besluitvorming#>
     PREFIX  besluit: <http://data.vlaanderen.be/ns/besluit#>
     PREFIX  dossier: <https://data.vlaanderen.be/ns/dossier#>
-    PREFIX  dbpedia:  <http://dbpedia.org/ontology/>
 
     Select ?activity ?subcase ?startDatum (COUNT(?agendaitem) as ?totalAgendaitems) WHERE {
-      ?subcase a dbpedia:UnitOfWork ;
+      ?subcase a dossier:Procedurestap ;
         mu:uuid ${sparqlEscapeString(subcaseId)} .
       ?activity besluitvorming:vindtPlaatsTijdens ?subcase .
       ?activity a besluitvorming:Agendering ;
@@ -50,7 +49,6 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
     PREFIX  besluitvorming:  <http://data.vlaanderen.be/ns/besluitvorming#>
     PREFIX  besluit: <http://data.vlaanderen.be/ns/besluit#>
     PREFIX  dossier: <https://data.vlaanderen.be/ns/dossier#>
-    PREFIX  dbpedia:  <http://dbpedia.org/ontology/>
     PREFIX dct: <http://purl.org/dc/terms/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
     PREFIX brc: <http://kanselarij.vo.data.gift/id/concept/beslissings-resultaat-codes/>
