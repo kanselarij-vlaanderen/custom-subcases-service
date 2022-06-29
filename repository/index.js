@@ -65,8 +65,8 @@ const getPhasesOfActivities = async (activityUri, subcaseUri) => {
       ?meeting besluit:geplandeStart ?geplandeStart .
 
       OPTIONAL {
-        ?treatment besluitvorming:heeftOnderwerp ?agendaitem .
-        ?treatment besluitvorming:resultaat ?decisionResult .
+        ?decisionActivity ^besluitvorming:heeftBeslissing/besluitvorming:heeftOnderwerp ?agendaitem .
+        ?decisionActivity besluitvorming:resultaat ?decisionResult .
         ?decisionResult mu:uuid ?decisionResultId .
       }
     }
